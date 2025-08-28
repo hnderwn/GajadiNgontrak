@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <!-- Wrapper Utama Aplikasi -->
     <main class="app-wrapper">
       <!-- Panel Kiri: Kontrol & Input Form -->
       <section class="control-panel">
@@ -28,74 +27,90 @@
           </div>
         </div>
 
+        <!-- Dual Input Uang Muka -->
         <div class="form-group">
           <label for="uangMuka">Uang Muka</label>
-          <div class="slider-group">
-            <input type="range" id="uangMuka" min="0" max="100" value="20" step="1" />
-            <span id="uangMukaValue">20%</span>
+          <div class="dual-input">
+            <div class="input-group">
+              <input type="number" id="uangMukaPersen" value="20" min="0" max="100" />
+              <span>%</span>
+            </div>
+            <div class="input-group">
+              <span>Rp</span>
+              <input type="text" id="uangMukaRupiah" value="250.000.000" />
+            </div>
           </div>
+          <input type="range" id="uangMukaSlider" min="0" max="100" value="20" step="1" class="full-width-slider" />
         </div>
 
+        <!-- Pilihan Suku Bunga Utama -->
         <div class="form-group">
-          <label for="jenisProgram">Jenis Program KPR</label>
-          <select id="jenisProgram">
-            <option value="fixFloating">Fix & Floating</option>
-            <option value="berjenjang">Step Up Berjenjang</option>
+          <label for="pilihanBunga">Pilihan Suku Bunga</label>
+          <select id="pilihanBunga">
+            <option value="custom">Custom</option>
+            <option value="rekomendasi">Rekomendasi</option>
+            <option value="bungaTerendah">Bunga Terendah</option>
           </select>
         </div>
 
         <hr />
 
-        <!-- Fields untuk Fix & Floating -->
-        <div id="fixFloatingFields">
+        <!-- Kontainer untuk Input Custom -->
+        <div id="customFields">
           <div class="form-group">
-            <label for="sukuBungaFix">Suku Bunga Fix (%)</label>
-            <input type="number" id="sukuBungaFix" value="8" step="0.1" />
+            <label for="jenisProgram">Jenis Program KPR</label>
+            <select id="jenisProgram">
+              <option value="fixFloating">Fix & Floating</option>
+              <option value="berjenjang">Step Up Berjenjang</option>
+            </select>
           </div>
-          <div class="form-group">
-            <label for="masaKreditFix">Masa Kredit Fix (Tahun)</label>
-            <input type="number" id="masaKreditFix" value="3" min="1" max="10" />
+
+          <!-- Fields untuk Fix & Floating -->
+          <div id="fixFloatingFields">
+            <div class="form-group slider-input-combo">
+              <label>Suku Bunga Fix</label>
+              <div class="input-group">
+                <input type="number" id="sukuBungaFix" value="8" step="0.1" min="1" max="15" />
+                <span>%</span>
+              </div>
+              <input type="range" id="sukuBungaFixSlider" value="8" step="0.1" min="1" max="15" />
+            </div>
+            <div class="form-group slider-input-combo">
+              <label>Masa Kredit Fix</label>
+              <div class="input-group">
+                <input type="number" id="masaKreditFix" value="5" min="1" max="10" />
+                <span>Tahun</span>
+              </div>
+              <input type="range" id="masaKreditFixSlider" value="5" min="1" max="10" />
+            </div>
+          </div>
+
+          <!-- Fields untuk Step Berjenjang -->
+          <div id="stepBerjenjangFields" class="hidden">
+            <div class="form-group">
+              <label for="masaKreditBerjenjang">Jumlah Jenjang Bunga (Tahun)</label>
+              <input type="number" id="masaKreditBerjenjang" value="3" min="1" max="10" />
+            </div>
+            <!-- Input bunga dinamis akan muncul di sini -->
+            <div id="berjenjangBungaInputs"></div>
+          </div>
+
+          <!-- Jangka Waktu KPR (Berlaku untuk semua program custom) -->
+          <div class="form-group slider-input-combo">
+            <label>Jangka Waktu KPR</label>
+            <div class="input-group">
+              <input type="number" id="jangkaWaktu" value="20" min="5" max="30" />
+              <span>Tahun</span>
+            </div>
+            <input type="range" id="jangkaWaktuSlider" value="20" min="5" max="30" />
           </div>
         </div>
-
-        <!-- Fields untuk Step Berjenjang -->
-        <div id="stepBerjenjangFields" class="hidden">
-          <div class="form-group">
-            <label for="bungaTahun1">Bunga Tahun ke-1 (%)</label>
-            <input type="number" id="bungaTahun1" value="6" step="0.1" />
-          </div>
-          <div class="form-group">
-            <label for="bungaTahun2">Bunga Tahun ke-2 (%)</label>
-            <input type="number" id="bungaTahun2" value="8" step="0.1" />
-          </div>
-          <div class="form-group">
-            <label for="bungaTahun3">Bunga Tahun ke-3 (%)</label>
-            <input type="number" id="bungaTahun3" value="10" step="0.1" />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="jangkaWaktu">Jangka Waktu KPR (Tahun)</label>
-          <input type="number" id="jangkaWaktu" value="20" min="5" max="30" />
-        </div>
-
-        <div class="form-group">
-          <label for="asumsiBungaFloating">Asumsi Bunga Floating (%)</label>
-          <input type="number" id="asumsiBungaFloating" value="11" step="0.1" />
-        </div>
-
-        <button id="hitungBtn">HITUNG SIMULASI 🚀</button>
       </section>
 
       <!-- Panel Kanan: Hasil Simulasi -->
       <section class="result-panel">
         <div id="results">
           <!-- Hasil akan ditampilkan di sini oleh JavaScript -->
-          <div class="placeholder">
-            <h2>Hasil Simulasi Anda</h2>
-            <p>Masukkan detail pinjaman di panel kiri dan klik hitung untuk melihat hasilnya di sini.</p>
-            <span>✨</span>
-          </div>
         </div>
       </section>
     </main>

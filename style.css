@@ -26,7 +26,7 @@ body {
   min-height: 100vh;
   margin: 0;
   padding: 20px;
-  overflow: hidden; /* Mencegah scroll di body */
+  overflow: hidden;
 }
 
 /* --- 3. LAYOUT UTAMA SPLIT-SCREEN --- */
@@ -46,16 +46,16 @@ body {
 }
 
 .control-panel {
-  flex: 0 0 45%; /* Lebar panel kiri 45% */
+  flex: 0 0 45%;
   padding: 30px 40px;
-  overflow-y: auto; /* Bisa di-scroll jika kontennya panjang */
+  overflow-y: auto;
 }
 
 .result-panel {
-  flex: 1; /* Mengambil sisa ruang */
+  flex: 1;
   padding: 30px 40px;
   overflow-y: auto;
-  background-color: rgba(0, 0, 0, 0.1); /* Sedikit beda warna */
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 /* --- 4. TIPOGRAFI --- */
@@ -101,6 +101,11 @@ select:focus {
   border-color: var(--accent-grad-end);
 }
 
+.input-group {
+  display: flex;
+  align-items: center;
+}
+
 .input-group span {
   padding: 12px;
   background-color: rgba(0, 0, 0, 0.3);
@@ -113,27 +118,47 @@ select:focus {
 .input-group input {
   border-radius: 0 8px 8px 0;
 }
+.input-group input:last-child {
+  border-radius: 0 8px 8px 0;
+}
+.input-group input:first-child {
+  border-radius: 8px 0 0 8px;
+  border-right: none;
+}
+.input-group input + span {
+  border-radius: 0 8px 8px 0;
+  border-right: 1px solid var(--card-border);
+  border-left: none;
+}
 
-/* --- 6. STYLE SLIDER DP (Sama seperti sebelumnya) --- */
-.slider-group {
-  display: flex;
-  align-items: center;
-  gap: 15px;
+/* --- 6. STYLE INPUT KHUSUS --- */
+.dual-input {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 10px;
+  margin-bottom: 10px;
 }
-.slider-group span {
-  font-weight: bold;
-  color: var(--text-primary);
-  min-width: 50px;
-  font-size: 16px;
+
+.full-width-slider {
+  width: 100%;
 }
+
+.slider-input-combo {
+  margin-bottom: 22px;
+}
+.slider-input-combo .input-group {
+  margin-bottom: 10px;
+}
+
 input[type='range'] {
   -webkit-appearance: none;
   appearance: none;
-  flex-grow: 1;
+  width: 100%;
   height: 8px;
   background: var(--input-bg);
   border-radius: 5px;
   outline: none;
+  padding: 0 !important;
 }
 input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -154,27 +179,7 @@ input[type='range']::-moz-range-thumb {
   border: 3px solid var(--bg-grad-end);
 }
 
-/* --- 7. TOMBOL CTA (Sama seperti sebelumnya) --- */
-button#hitungBtn {
-  width: 100%;
-  padding: 15px;
-  background-image: linear-gradient(to right, var(--accent-grad-start) 0%, var(--accent-grad-end) 51%, var(--accent-grad-start) 100%);
-  background-size: 200% auto;
-  color: #111;
-  border: none;
-  border-radius: 8px;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.4s ease;
-  margin-top: 10px;
-}
-button#hitungBtn:hover {
-  background-position: right center;
-  box-shadow: 0 4px 15px rgba(52, 232, 158, 0.4);
-}
-
-/* --- 8. AREA HASIL SIMULASI --- */
+/* --- 7. AREA HASIL SIMULASI --- */
 .hidden {
   display: none;
 }
@@ -182,9 +187,6 @@ hr {
   margin: 30px 0;
   border: none;
   border-top: 1px solid var(--card-border);
-}
-#results {
-  /* Tidak perlu style khusus lagi */
 }
 .result-item {
   padding: 20px;
@@ -210,11 +212,15 @@ hr {
   font-weight: bold;
   color: var(--text-primary);
 }
-
 .placeholder {
   text-align: center;
   padding: 50px 20px;
   color: var(--text-secondary);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 .placeholder h2 {
   color: var(--text-primary);
@@ -225,18 +231,24 @@ hr {
   margin-top: 20px;
 }
 
-/* --- 9. RESPONSIVE DESIGN --- */
+/* --- 8. RESPONSIVE DESIGN --- */
 @media (max-width: 992px) {
+  body {
+    padding: 0;
+    overflow: visible;
+  }
   .app-wrapper {
     flex-direction: column;
-    height: 95vh;
+    height: auto;
     max-height: none;
+    border-radius: 0;
   }
   .control-panel,
   .result-panel {
     flex: 1;
     width: 100%;
     box-sizing: border-box;
+    overflow-y: visible;
   }
   .result-panel {
     border-top: 1px solid var(--card-border);
