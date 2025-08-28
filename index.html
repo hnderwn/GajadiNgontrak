@@ -3,119 +3,188 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kalkulator KPR Fokus</title>
+    <title>GajadiNgontrak - Kalkulator KPR</title>
 
     <!-- Import Font Inter dari Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
 
-    <!-- Menghubungkan ke file CSS eksternal -->
+    <!-- 1. Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 2. CSS Kustom (untuk scrollbar & slider) -->
     <link rel="stylesheet" href="style.css" />
+
+    <!-- Library untuk Ekspor PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
   </head>
-  <body>
-    <main class="app-wrapper">
+  <body class="bg-slate-900 text-slate-200 font-sans flex justify-center items-center min-h-screen p-0 lg:p-4" style="font-family: 'Inter', sans-serif">
+    <!-- PERUBAHAN DI SINI: h-screen dihapus, overflow-hidden jadi lg:overflow-hidden -->
+    <main class="flex flex-col lg:flex-row w-full max-w-7xl lg:h-[90vh] lg:max-h-[800px] bg-slate-900/50 border-0 lg:border lg:border-white/10 backdrop-blur-xl shadow-2xl rounded-none lg:rounded-3xl lg:overflow-hidden">
       <!-- Panel Kiri: Kontrol & Input Form -->
-      <section class="control-panel">
-        <h1>Kalkulator Simulasi KPR 🏠</h1>
+      <section class="lg:w-[45%] p-6 lg:p-10 overflow-y-auto custom-scrollbar">
+        <h1 class="text-3xl font-bold text-center text-white mb-8">GajadiNgontrak 🏠</h1>
 
-        <div class="form-group">
-          <label for="hargaProperti">Harga Properti</label>
-          <div class="input-group">
-            <span>Rp</span>
-            <input type="text" id="hargaProperti" value="1250000000" />
+        <div class="space-y-6">
+          <div>
+            <label for="hargaProperti" class="block text-sm font-medium text-slate-400 mb-2">Harga Properti</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">Rp</span>
+              <input
+                type="text"
+                id="hargaProperti"
+                value="500.000.000"
+                class="w-full bg-slate-800/50 border border-slate-700 rounded-lg pl-10 pr-4 py-3 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 outline-none transition-colors"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-400 mb-2">Uang Muka</label>
+            <div class="grid grid-cols-2 gap-4 mb-2">
+              <div class="relative">
+                <input
+                  type="number"
+                  id="uangMukaPersen"
+                  value="10"
+                  min="0"
+                  max="100"
+                  class="w-full bg-slate-800/50 border border-slate-700 rounded-lg pl-4 pr-8 py-3 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 outline-none transition-colors"
+                />
+                <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400">%</span>
+              </div>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">Rp</span>
+                <input
+                  type="text"
+                  id="uangMukaRupiah"
+                  value="50.000.000"
+                  class="w-full bg-slate-800/50 border border-slate-700 rounded-lg pl-10 pr-4 py-3 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 outline-none transition-colors"
+                />
+              </div>
+            </div>
+            <input type="range" id="uangMukaSlider" min="0" max="100" value="20" step="1" class="w-full cursor-pointer" />
+          </div>
+
+          <div>
+            <label for="pilihanBunga" class="block text-sm font-medium text-slate-400 mb-2">Pilihan Suku Bunga</label>
+            <select id="pilihanBunga" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 outline-none transition-colors">
+              <option value="custom">Custom</option>
+              <option value="rekomendasi">Rekomendasi</option>
+              <option value="bungaTerendah">Bunga Terendah</option>
+            </select>
+            <div id="presetInfo" class="mt-4"></div>
           </div>
         </div>
 
-        <!-- Dual Input Uang Muka -->
-        <div class="form-group">
-          <label for="uangMuka">Uang Muka</label>
-          <div class="dual-input">
-            <div class="input-group">
-              <input type="number" id="uangMukaPersen" value="20" min="0" max="100" />
-              <span>%</span>
-            </div>
-            <div class="input-group">
-              <span>Rp</span>
-              <input type="text" id="uangMukaRupiah" value="250.000.000" />
-            </div>
-          </div>
-          <input type="range" id="uangMukaSlider" min="0" max="100" value="20" step="1" class="full-width-slider" />
-        </div>
+        <hr class="border-slate-700 my-6" />
 
-        <!-- Pilihan Suku Bunga Utama -->
-        <div class="form-group">
-          <label for="pilihanBunga">Pilihan Suku Bunga</label>
-          <select id="pilihanBunga">
-            <option value="custom">Custom</option>
-            <option value="rekomendasi">Rekomendasi</option>
-            <option value="bungaTerendah">Bunga Terendah</option>
-          </select>
-        </div>
-
-        <hr />
-
-        <!-- Kontainer untuk Input Custom -->
-        <div id="customFields">
-          <div class="form-group">
-            <label for="jenisProgram">Jenis Program KPR</label>
-            <select id="jenisProgram">
+        <div id="customFields" class="space-y-6">
+          <div>
+            <label for="jenisProgram" class="block text-sm font-medium text-slate-400 mb-2">Jenis Program KPR</label>
+            <select id="jenisProgram" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 outline-none transition-colors">
               <option value="fixFloating">Fix & Floating</option>
               <option value="berjenjang">Step Up Berjenjang</option>
             </select>
           </div>
 
-          <!-- Fields untuk Fix & Floating -->
-          <div id="fixFloatingFields">
-            <div class="form-group slider-input-combo">
-              <label>Suku Bunga Fix</label>
-              <div class="input-group">
-                <input type="number" id="sukuBungaFix" value="8" step="0.1" min="1" max="15" />
-                <span>%</span>
+          <div id="fixFloatingFields" class="space-y-6">
+            <div>
+              <label class="block text-sm font-medium text-slate-400 mb-2">Suku Bunga Fix</label>
+              <div class="relative mb-2">
+                <input
+                  type="number"
+                  id="sukuBungaFix"
+                  value="8"
+                  step="0.1"
+                  min="1"
+                  max="15"
+                  class="w-full bg-slate-800/50 border border-slate-700 rounded-lg pl-4 pr-8 py-3 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 outline-none transition-colors"
+                />
+                <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400">%</span>
               </div>
-              <input type="range" id="sukuBungaFixSlider" value="8" step="0.1" min="1" max="15" />
+              <input type="range" id="sukuBungaFixSlider" value="8" step="0.1" min="1" max="15" class="w-full cursor-pointer" />
             </div>
-            <div class="form-group slider-input-combo">
-              <label>Masa Kredit Fix</label>
-              <div class="input-group">
-                <input type="number" id="masaKreditFix" value="5" min="1" max="10" />
-                <span>Tahun</span>
+            <div>
+              <label class="block text-sm font-medium text-slate-400 mb-2">Masa Kredit Fix</label>
+              <div class="relative mb-2">
+                <input
+                  type="number"
+                  id="masaKreditFix"
+                  value="5"
+                  min="1"
+                  max="10"
+                  class="w-full bg-slate-800/50 border border-slate-700 rounded-lg pl-4 pr-14 py-3 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 outline-none transition-colors"
+                />
+                <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400">Tahun</span>
               </div>
-              <input type="range" id="masaKreditFixSlider" value="5" min="1" max="10" />
+              <input type="range" id="masaKreditFixSlider" value="5" min="1" max="10" class="w-full cursor-pointer" />
             </div>
           </div>
 
-          <!-- Fields untuk Step Berjenjang -->
-          <div id="stepBerjenjangFields" class="hidden">
-            <div class="form-group">
-              <label for="masaKreditBerjenjang">Jumlah Jenjang Bunga (Tahun)</label>
-              <input type="number" id="masaKreditBerjenjang" value="3" min="1" max="10" />
+          <div id="stepBerjenjangFields" class="hidden space-y-6">
+            <div>
+              <label for="masaKreditBerjenjang" class="block text-sm font-medium text-slate-400 mb-2">Jumlah Jenjang Bunga (Tahun)</label>
+              <input
+                type="number"
+                id="masaKreditBerjenjang"
+                value="3"
+                min="1"
+                max="10"
+                class="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 outline-none transition-colors"
+              />
             </div>
-            <!-- Input bunga dinamis akan muncul di sini -->
-            <div id="berjenjangBungaInputs"></div>
+            <div id="berjenjangBungaInputs" class="space-y-4"></div>
           </div>
 
-          <!-- Jangka Waktu KPR (Berlaku untuk semua program custom) -->
-          <div class="form-group slider-input-combo">
-            <label>Jangka Waktu KPR</label>
-            <div class="input-group">
-              <input type="number" id="jangkaWaktu" value="20" min="5" max="30" />
-              <span>Tahun</span>
+          <div>
+            <label class="block text-sm font-medium text-slate-400 mb-2">Jangka Waktu KPR</label>
+            <div class="relative mb-2">
+              <input
+                type="number"
+                id="jangkaWaktu"
+                value="20"
+                min="5"
+                max="30"
+                class="w-full bg-slate-800/50 border border-slate-700 rounded-lg pl-4 pr-14 py-3 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 outline-none transition-colors"
+              />
+              <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400">Tahun</span>
             </div>
-            <input type="range" id="jangkaWaktuSlider" value="20" min="5" max="30" />
+            <input type="range" id="jangkaWaktuSlider" value="20" min="5" max="30" class="w-full cursor-pointer" />
           </div>
         </div>
       </section>
 
       <!-- Panel Kanan: Hasil Simulasi -->
-      <section class="result-panel">
+      <section class="lg:flex-1 p-6 lg:p-10 overflow-y-auto custom-scrollbar bg-black/10 flex flex-col">
         <div id="results">
-          <!-- Hasil akan ditampilkan di sini oleh JavaScript -->
+          <!-- Ringkasan Hasil Real-time akan muncul di sini -->
+        </div>
+
+        <div class="mt-6 text-center">
+          <button id="showTableBtn" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 hidden">Tampilkan Rincian Angsuran</button>
+        </div>
+
+        <div class="export-buttons mt-6" id="exportContainer">
+          <!-- Tombol Ekspor akan muncul di sini -->
+        </div>
+
+        <div id="loader" class="hidden text-center my-6">
+          <svg class="animate-spin h-8 w-8 text-cyan-400 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p class="mt-2 text-slate-400">Menghitung tabel angsuran...</p>
+        </div>
+
+        <div class="table-container mt-6 hidden" id="amortizationContainer">
+          <!-- Tabel akan digenerate oleh JavaScript di sini -->
         </div>
       </section>
     </main>
 
-    <!-- Menghubungkan ke file JavaScript eksternal -->
     <script src="script.js"></script>
   </body>
 </html>

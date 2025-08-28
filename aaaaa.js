@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
     uangMukaRupiah: document.getElementById('uangMukaRupiah'),
     uangMukaSlider: document.getElementById('uangMukaSlider'),
     pilihanBunga: document.getElementById('pilihanBunga'),
-    presetInfo: document.getElementById('presetInfo'),
+    presetInfo: document.getElementById('presetInfo'), // Elemen baru
     customFields: document.getElementById('customFields'),
     jenisProgram: document.getElementById('jenisProgram'),
     fixFloatingFields: document.getElementById('fixFloatingFields'),
@@ -45,16 +45,16 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   // --- STATE MANAGEMENT ---
-  let isUpdatingDP = false; // Flag untuk mencegah infinite loop di input DP
-  let amortizationData = []; // Variabel global untuk menyimpan data tabel
+  let isUpdatingDP = false;
+  let amortizationData = [];
 
-  // --- FUNGSI FORMAT ANGKA ---
+  // --- FUNGSI FORMAT ANGKA (DIPERBARUI) ---
   const formatToRupiah = (angka) =>
     new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+      minimumFractionDigits: 0, // Tidak ada angka di belakang koma
+      maximumFractionDigits: 0, // Pastikan tidak ada angka di belakang koma
     }).format(angka);
   const parseRupiah = (text) => parseFloat(String(text).replace(/[^0-9]/g, '')) || 0;
 
@@ -70,9 +70,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // 1. Fungsi untuk kalkulasi & render ringkasan (REAL-TIME)
   function calculateAndDisplaySummary() {
-    // Sembunyikan tabel & tombol jika ada perubahan input
     elements.amortizationContainer.classList.add('hidden');
-    elements.exportContainer.innerHTML = ''; // Kosongkan tombol ekspor
+    elements.exportContainer.innerHTML = '';
 
     const harga = parseRupiah(elements.hargaProperti.value);
     const dp = parseRupiah(elements.uangMukaRupiah.value);
@@ -86,17 +85,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
     elements.showTableBtn.classList.remove('hidden');
 
-    // Untuk ringkasan, kita hanya butuh angsuran pertama dari skema fix
-    const jangkaWaktuTahun = parseInt(elements.jangkaWaktu.value);
-    const totalTenorBulan = jangkaWaktuTahun * 12;
-    const sukuBungaFix = parseFloat(elements.sukuBungaFix.value) / 100 / 12;
+    const pilihan = elements.pilihanBunga.value;
+    let jangkaWaktuTahun, sukuBungaAwal;
 
-    const angsuranPertama = hitungAngsuran(plafond, sukuBungaFix, totalTenorBulan);
+    if (pilihan === 'custom') {
+      jangkaWaktuTahun = parseInt(elements.jangkaWaktu.value);
+      sukuBungaAwal = parseFloat(elements.sukuBungaFix.value) / 100 / 12;
+    } else {
+      const preset = presets[pilihan];
+      jangkaWaktuTahun = preset.jangkaWaktu;
+      sukuBungaAwal = (preset.sukuBungaFix || preset.bungaBerjenjang[0]) / 100 / 12;
+    }
+
+    const totalTenorBulan = jangkaWaktuTahun * 12;
+    const angsuranPertama = hitungAngsuran(plafond, sukuBungaAwal, totalTenorBulan);
     const totalPembayaran = angsuranPertama * totalTenorBulan;
     const totalBunga = totalPembayaran - plafond;
     const biayaLain = plafond * 0.06;
 
-    let resultsHTML = `
+    elements.resultsContainer.innerHTML = `
             <div class="space-y-6">
                 <div class="bg-slate-800/50 p-6 rounded-xl">
                     <h3 class="font-bold text-lg text-white mb-4">Estimasi Pembayaran Pertama</h3>
@@ -116,7 +123,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
             </div>
         `;
-    elements.resultsContainer.innerHTML = resultsHTML;
   }
 
   // 2. Fungsi yang dipanggil saat tombol "Tampilkan Tabel" diklik (ON-DEMAND)
@@ -125,7 +131,6 @@ document.addEventListener('DOMContentLoaded', function () {
     elements.amortizationContainer.classList.add('hidden');
     elements.exportContainer.innerHTML = '';
 
-    // Simulasi kerja berat untuk UX
     setTimeout(() => {
       const plafond = parseRupiah(elements.hargaProperti.value) - parseRupiah(elements.uangMukaRupiah.value);
       const totalTenorBulan = parseInt(elements.jangkaWaktu.value) * 12;
@@ -137,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       elements.loader.classList.add('hidden');
       elements.amortizationContainer.classList.remove('hidden');
-    }, 500); // Jeda 0.5 detik
+    }, 500);
   }
 
   // --- FUNGSI-FUNGSI PEMBANTU ---
@@ -146,14 +151,11 @@ document.addEventListener('DOMContentLoaded', function () {
     let data = [];
     let sisaPokok = plafond;
     const bungaBulanan = sukuBungaFix / 100 / 12;
-
     for (let i = 1; i <= totalTenorBulan; i++) {
-      // NOTE: Logika ini masih disederhanakan untuk bunga fix selama tenor.
       const angsuran = hitungAngsuran(plafond, bungaBulanan, totalTenorBulan);
       const bungaPinjaman = sisaPokok * bungaBulanan;
       const pokokPinjaman = angsuran - bungaPinjaman;
       sisaPokok -= pokokPinjaman;
-
       data.push({
         bulan: i,
         pokok: pokokPinjaman,
@@ -171,26 +173,26 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
     let tableHTML = `
-            <table class="w-full text-xs text-left text-slate-300 text-center">
+            <table class="w-full text-sm text-left text-slate-300">
                 <thead class="text-xs text-slate-400 uppercase bg-slate-800/50">
                     <tr>
-                        <th scope="col" class="px-4 py-3">Bulan</th>
-                        <th scope="col" class="px-4 py-3">Pokok</th>
-                        <th scope="col" class="px-4 py-3">Bunga</th>
-                        <th scope="col" class="px-4 py-3">Total Angsuran</th>
-                        <th scope="col" class="px-4 py-3">Sisa Utang</th>
+                        <th scope="col" class="px-6 py-3">Bulan Ke-</th>
+                        <th scope="col" class="px-6 py-3">Pokok</th>
+                        <th scope="col" class="px-6 py-3">Bunga</th>
+                        <th scope="col" class="px-6 py-3">Total Angsuran</th>
+                        <th scope="col" class="px-6 py-3">Sisa Utang</th>
                     </tr>
                 </thead>
                 <tbody>
         `;
     data.forEach((row) => {
       tableHTML += `
-                <tr class="border-b border-slate-700 hover:bg-slate-800/50 text-start">
-                    <td class="px-4 py-4 font-medium text-white">${row.bulan}</td>
-                    <td class="px-4 py-4">${formatToRupiah(row.pokok)}</td>
-                    <td class="px-4 py-4">${formatToRupiah(row.bunga)}</td>
-                    <td class="px-4 py-4 font-semibold text-white">${formatToRupiah(row.total)}</td>
-                    <td class="px-4 py-4">${formatToRupiah(row.sisa)}</td>
+                <tr class="border-b border-slate-700 hover:bg-slate-800/50">
+                    <td class="px-6 py-4 font-medium text-white">${row.bulan}</td>
+                    <td class="px-6 py-4">${formatToRupiah(row.pokok)}</td>
+                    <td class="px-6 py-4">${formatToRupiah(row.bunga)}</td>
+                    <td class="px-6 py-4 font-semibold text-white">${formatToRupiah(row.total)}</td>
+                    <td class="px-6 py-4">${formatToRupiah(row.sisa)}</td>
                 </tr>
             `;
     });
@@ -212,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let csvContent = 'data:text/csv;charset=utf-8,';
     csvContent += 'Bulan Ke,Pokok,Bunga,Total Angsuran,Sisa Utang\n';
     amortizationData.forEach((row) => {
-      csvContent += `${row.bulan},${row.pokok},${row.bunga},${row.total},${row.sisa}\n`;
+      csvContent += `${row.bulan},${Math.round(row.pokok)},${Math.round(row.bunga)},${Math.round(row.total)},${Math.round(row.sisa)}\n`;
     });
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
@@ -234,7 +236,6 @@ document.addEventListener('DOMContentLoaded', function () {
     doc.save('jadwal_angsuran_gajadingontrak.pdf');
   }
 
-  // --- (Sisa fungsi-fungsi helper dan inisialisasi sama seperti sebelumnya) ---
   function syncSliderAndInput(slider, input) {
     slider.addEventListener('input', () => {
       input.value = slider.value;
@@ -248,6 +249,7 @@ document.addEventListener('DOMContentLoaded', function () {
   syncSliderAndInput(elements.sukuBungaFixSlider, elements.sukuBungaFix);
   syncSliderAndInput(elements.masaKreditFixSlider, elements.masaKreditFix);
   syncSliderAndInput(elements.jangkaWaktuSlider, elements.jangkaWaktu);
+
   function updateDP(source) {
     if (isUpdatingDP) return;
     isUpdatingDP = true;
@@ -281,15 +283,15 @@ document.addEventListener('DOMContentLoaded', function () {
     elements.berjenjangBungaInputs.innerHTML = '';
     for (let i = 1; i <= count; i++) {
       const div = document.createElement('div');
-      div.className = 'form-group';
-      div.innerHTML = `<label>Bunga Tahun ke-${i} (%)</label><input type="number" class="bunga-berjenjang-input bg-slate-800/50 border border-slate-700 rounded-lg ml-3 px-4 py-3 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 outline-none transition-colors" value="7" step="0.1" min="1" max="25">`;
+      div.className = 'space-y-2';
+      div.innerHTML = `<label class="text-sm font-medium text-slate-400">Bunga Tahun ke-${i} (%)</label><input type="number" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 outline-none transition-colors bunga-berjenjang-input" value="7" step="0.1" min="1" max="25">`;
       elements.berjenjangBungaInputs.appendChild(div);
     }
     document.querySelectorAll('.bunga-berjenjang-input').forEach((input) => {
       input.addEventListener('input', calculateAndDisplaySummary);
     });
-    calculateAndDisplaySummary();
   }
+
   function fillFormWithPreset(presetName) {
     const data = presets[presetName];
     elements.jenisProgram.value = data.jenisProgram;
@@ -310,6 +312,7 @@ document.addEventListener('DOMContentLoaded', function () {
     elements.jangkaWaktu.value = data.jangkaWaktu;
     elements.jangkaWaktuSlider.value = data.jangkaWaktu;
   }
+
   function toggleProgramFields() {
     if (elements.jenisProgram.value === 'fixFloating') {
       elements.fixFloatingFields.classList.remove('hidden');
@@ -319,6 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
       elements.fixFloatingFields.classList.add('hidden');
     }
   }
+
   function handlePilihanBungaChange() {
     const pilihan = elements.pilihanBunga.value;
     const presetInfoEl = elements.presetInfo;
@@ -330,7 +334,7 @@ document.addEventListener('DOMContentLoaded', function () {
       elements.customFields.classList.add('hidden');
       const data = presets[pilihan];
       let infoHTML = `
-                <div class="bg-slate-800/50 p-4 my-8 rounded-lg text-sm border border-cyan-500/30">
+                <div class="bg-slate-800/50 p-4 rounded-lg text-sm border border-cyan-500/30">
                     <p class="font-bold text-white mb-2">${data.name}</p>
                     <ul class="list-disc list-inside text-slate-400 space-y-1">
             `;
@@ -364,7 +368,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function initialize() {
     toggleProgramFields();
     generateBerjenjangInputs();
-    updateDP('persen');
+    updateDP('persen'); // Panggil ini untuk kalkulasi pertama kali
   }
 
   initialize();
