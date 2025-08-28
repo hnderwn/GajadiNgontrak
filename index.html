@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kalkulator KPR Fokus</title>
+
+    <!-- Import Font Inter dari Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+
+    <!-- Menghubungkan ke file CSS eksternal -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Wrapper Utama Aplikasi -->
+    <main class="app-wrapper">
+      <!-- Panel Kiri: Kontrol & Input Form -->
+      <section class="control-panel">
+        <h1>Kalkulator Simulasi KPR 🏠</h1>
+
+        <div class="form-group">
+          <label for="hargaProperti">Harga Properti</label>
+          <div class="input-group">
+            <span>Rp</span>
+            <input type="text" id="hargaProperti" value="1250000000" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="uangMuka">Uang Muka</label>
+          <div class="slider-group">
+            <input type="range" id="uangMuka" min="0" max="100" value="20" step="1" />
+            <span id="uangMukaValue">20%</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="jenisProgram">Jenis Program KPR</label>
+          <select id="jenisProgram">
+            <option value="fixFloating">Fix & Floating</option>
+            <option value="berjenjang">Step Up Berjenjang</option>
+          </select>
+        </div>
+
+        <hr />
+
+        <!-- Fields untuk Fix & Floating -->
+        <div id="fixFloatingFields">
+          <div class="form-group">
+            <label for="sukuBungaFix">Suku Bunga Fix (%)</label>
+            <input type="number" id="sukuBungaFix" value="8" step="0.1" />
+          </div>
+          <div class="form-group">
+            <label for="masaKreditFix">Masa Kredit Fix (Tahun)</label>
+            <input type="number" id="masaKreditFix" value="3" min="1" max="10" />
+          </div>
+        </div>
+
+        <!-- Fields untuk Step Berjenjang -->
+        <div id="stepBerjenjangFields" class="hidden">
+          <div class="form-group">
+            <label for="bungaTahun1">Bunga Tahun ke-1 (%)</label>
+            <input type="number" id="bungaTahun1" value="6" step="0.1" />
+          </div>
+          <div class="form-group">
+            <label for="bungaTahun2">Bunga Tahun ke-2 (%)</label>
+            <input type="number" id="bungaTahun2" value="8" step="0.1" />
+          </div>
+          <div class="form-group">
+            <label for="bungaTahun3">Bunga Tahun ke-3 (%)</label>
+            <input type="number" id="bungaTahun3" value="10" step="0.1" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="jangkaWaktu">Jangka Waktu KPR (Tahun)</label>
+          <input type="number" id="jangkaWaktu" value="20" min="5" max="30" />
+        </div>
+
+        <div class="form-group">
+          <label for="asumsiBungaFloating">Asumsi Bunga Floating (%)</label>
+          <input type="number" id="asumsiBungaFloating" value="11" step="0.1" />
+        </div>
+
+        <button id="hitungBtn">HITUNG SIMULASI 🚀</button>
+      </section>
+
+      <!-- Panel Kanan: Hasil Simulasi -->
+      <section class="result-panel">
+        <div id="results">
+          <!-- Hasil akan ditampilkan di sini oleh JavaScript -->
+          <div class="placeholder">
+            <h2>Hasil Simulasi Anda</h2>
+            <p>Masukkan detail pinjaman di panel kiri dan klik hitung untuk melihat hasilnya di sini.</p>
+            <span>✨</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Menghubungkan ke file JavaScript eksternal -->
+    <script src="script.js"></script>
+  </body>
+</html>
